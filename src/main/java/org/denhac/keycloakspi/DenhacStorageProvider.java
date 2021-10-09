@@ -1,5 +1,9 @@
 package org.denhac.keycloakspi;
 
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.JsonDataException;
+import com.squareup.moshi.Moshi;
+import com.squareup.moshi.Types;
 import okhttp3.*;
 import org.keycloak.component.ComponentModel;
 import org.keycloak.credential.CredentialInput;
@@ -12,6 +16,7 @@ import org.keycloak.storage.user.UserLookupProvider;
 import org.keycloak.storage.user.UserQueryProvider;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -110,7 +115,7 @@ public class DenhacStorageProvider implements UserStorageProvider, UserLookupPro
 
     @Override
     public List<UserModel> getUsers(RealmModel realmModel) {
-        ArrayList<DenhacUser> users = new ArrayList<>();
+        ArrayList<UserModel> users;
 
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
@@ -118,12 +123,30 @@ public class DenhacStorageProvider implements UserStorageProvider, UserLookupPro
                 .addHeader(this.denhacAccessKey, this.getDenhacAccessKeySecret)
                 .get()
                 .build();
+
+        Moshi moshi = new Moshi.Builder().build();
+        Type type = Types.newParameterizedType(ArrayList.class, DenhacUser.class);
+        JsonAdapter<ArrayList<UserModel>> denhacUserJsonAdapter = moshi.adapter(type);
+
         try (Response response = client.newCall(request).execute()) {
-            // TODO serialize
-            // This doesn't work
-            return (List<UserModel>) users;
+            // [
+            //  {
+            //    "ID": "44",
+            //    "display_name": "Swag",
+            //    "user_email": "swag@example.com",
+            //    "first_name": "Swag",
+            //    "last_name": "Swag",
+            //    "membership_status": "ACTIVE"
+            //  }
+            // ]
+            if (response.isSuccessful()) {
+                users = denhacUserJsonAdapter.fromJson(response.body().source());
+                return users;
+            }
         } catch (IOException e) {
             // TODO
+        } catch (JsonDataException e) {
+           // TODO for dev
         }
         return null;
     }

@@ -1,5 +1,6 @@
 package org.denhac.keycloakspi;
 
+import com.squareup.moshi.Json;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.RoleModel;
@@ -10,8 +11,24 @@ import java.util.Map;
 import java.util.Set;
 
 public class DenhacUser implements UserModel {
+
+    @Json(name = "ID")
     private String id;
+    @Json(name = "display_name")
     private String username;
+    @Json(name = "user_email")
+    private String email;
+    @Json(name = "first_name")
+    private String firstName;
+    @Json(name = "last_name")
+    private String lastName;
+    @Json(name = "membership_status")
+    private MembershipStatus membershipStatus;
+
+    enum MembershipStatus {
+        ACTIVE,
+        INACTIVE
+    }
 
     @Override
     public String getId() {
