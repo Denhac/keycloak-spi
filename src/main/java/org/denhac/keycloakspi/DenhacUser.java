@@ -25,6 +25,9 @@ public class DenhacUser implements UserModel {
     @Json(name = "membership_status")
     private MembershipStatus membershipStatus;
 
+    private Long createdTimestamp;
+    private boolean enabled;
+
     enum MembershipStatus {
         ACTIVE,
         INACTIVE
@@ -47,22 +50,22 @@ public class DenhacUser implements UserModel {
 
     @Override
     public Long getCreatedTimestamp() {
-        return null;
+        return this.createdTimestamp;
     }
 
     @Override
     public void setCreatedTimestamp(Long aLong) {
-
+        this.createdTimestamp = aLong;
     }
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return this.enabled;
     }
 
     @Override
     public void setEnabled(boolean b) {
-
+        this.enabled = b;
     }
 
     @Override
@@ -112,42 +115,41 @@ public class DenhacUser implements UserModel {
 
     @Override
     public String getFirstName() {
-        return null;
+        return this.firstName;
     }
 
     @Override
     public void setFirstName(String s) {
-
+        this.firstName = s;
     }
 
     @Override
     public String getLastName() {
-        return null;
+        return this.lastName;
     }
 
     @Override
     public void setLastName(String s) {
-
+        this.lastName = s;
     }
 
     @Override
     public String getEmail() {
-        return null;
+        return this.email;
     }
 
     @Override
     public void setEmail(String s) {
-
+        this.email = s;
     }
 
     @Override
     public boolean isEmailVerified() {
-        return false;
+        return true;
     }
 
     @Override
     public void setEmailVerified(boolean b) {
-
     }
 
     @Override

@@ -32,6 +32,8 @@ public class DenhacStorageProvider implements UserStorageProvider, UserLookupPro
     public DenhacStorageProvider(KeycloakSession keycloakSession, ComponentModel componentModel) {
         this.keycloakSession = keycloakSession;
         this.componentModel = componentModel;
+
+        // TODO: There is a way for the provider to be passed config from the UI.
         this.denhacValidateEndpoint = System.getenv("DENHAC_VALIDATE_ENDPOINT");
         this.denhacListUsersEndpoint = System.getenv("DENHAC_LIST_USERS_ENDPOINT");
         this.denhacAccessKey = System.getenv("DENHAC_ACCESS_KEY");
