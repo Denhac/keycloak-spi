@@ -1,71 +1,226 @@
 package org.denhac.keycloakspi;
 
-import com.squareup.moshi.Json;
+import org.keycloak.models.ClientModel;
+import org.keycloak.models.GroupModel;
+import org.keycloak.models.RoleModel;
+import org.keycloak.models.UserModel;
 
-public class DenhacUser {
-    @Json(name = "ID")
-    private String id;
-    @Json(name = "user_login")
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+public class DenhacUser implements UserModel {
+    private final String id;
     private String username;
-    @Json(name = "user_email")
-    private String email;
-    @Json(name = "first_name")
-    private String firstName;
-    @Json(name = "last_name")
-    private String lastName;
-    @Json(name = "membership_status")
-    private MembershipStatus membershipStatus;
 
-    enum MembershipStatus {
-        ACTIVE,
-        INACTIVE
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
+    public DenhacUser(String id) {
         this.id = id;
     }
 
-    public String getUsername() {
-        return username;
+    @Override
+    public String getId() {
+        return this.id;
     }
 
+    @Override
+    public String getUsername() {
+        return this.username;
+    }
+
+    @Override
     public void setUsername(String username) {
         this.username = username;
     }
 
-    public String getEmail() {
-        return email;
+    @Override
+    public Long getCreatedTimestamp() {
+        // todo
+        return null;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    @Override
+    public void setCreatedTimestamp(Long timestamp) {
+        // todo
     }
 
+    @Override
+    public boolean isEnabled() {
+        return false;
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        // todo
+    }
+
+    @Override
+    public void setSingleAttribute(String name, String value) {
+        // todo
+    }
+
+    @Override
+    public void setAttribute(String name, List<String> values) {
+        // todo
+    }
+
+    @Override
+    public void removeAttribute(String name) {
+        // todo
+    }
+
+    @Override
+    public String getFirstAttribute(String name) {
+        // todo
+        return null;
+    }
+
+    @Override
+    public List<String> getAttribute(String name) {
+        // todo
+        return null;
+    }
+
+    @Override
+    public Map<String, List<String>> getAttributes() {
+        // todo
+        return null;
+    }
+
+    @Override
+    public Set<String> getRequiredActions() {
+        // todo
+        return null;
+    }
+
+    @Override
+    public void addRequiredAction(String action) {
+        // todo
+    }
+
+    @Override
+    public void removeRequiredAction(String action) {
+        // todo
+    }
+
+    @Override
     public String getFirstName() {
-        return firstName;
+        // todo
+        return null;
     }
 
+    @Override
     public void setFirstName(String firstName) {
-        this.firstName = firstName;
+        // todo
     }
 
+    @Override
     public String getLastName() {
-        return lastName;
+        // todo
+        return null;
     }
 
+    @Override
     public void setLastName(String lastName) {
-        this.lastName = lastName;
+        // todo
     }
 
-    public MembershipStatus getMembershipStatus() {
-        return membershipStatus;
+    @Override
+    public String getEmail() {
+        // todo
+        return null;
     }
 
-    public void setMembershipStatus(MembershipStatus membershipStatus) {
-        this.membershipStatus = membershipStatus;
+    @Override
+    public void setEmail(String email) {
+        // todo
+    }
+
+    @Override
+    public boolean isEmailVerified() {
+        // todo
+        return false;
+    }
+
+    @Override
+    public void setEmailVerified(boolean verified) {
+        // todo
+    }
+
+    @Override
+    public Set<GroupModel> getGroups() {
+        // todo
+        return null;
+    }
+
+    @Override
+    public void joinGroup(GroupModel group) {
+        // todo
+    }
+
+    @Override
+    public void leaveGroup(GroupModel group) {
+        // todo
+    }
+
+    @Override
+    public boolean isMemberOf(GroupModel group) {
+        // todo
+        return false;
+    }
+
+    @Override
+    public String getFederationLink() {
+        // todo
+        return null;
+    }
+
+    @Override
+    public void setFederationLink(String link) {
+        // todo
+    }
+
+    @Override
+    public String getServiceAccountClientLink() {
+        // todo
+        return null;
+    }
+
+    @Override
+    public void setServiceAccountClientLink(String clientInternalId) {
+        // todo
+    }
+
+    @Override
+    public Set<RoleModel> getRealmRoleMappings() {
+        // todo
+        return null;
+    }
+
+    @Override
+    public Set<RoleModel> getClientRoleMappings(ClientModel app) {
+        // todo
+        return null;
+    }
+
+    @Override
+    public boolean hasRole(RoleModel role) {
+        // todo
+        return false;
+    }
+
+    @Override
+    public void grantRole(RoleModel role) {
+        // todo
+    }
+
+    @Override
+    public Set<RoleModel> getRoleMappings() {
+        // todo
+        return null;
+    }
+
+    @Override
+    public void deleteRoleMapping(RoleModel role) {
+        // todo
     }
 }
