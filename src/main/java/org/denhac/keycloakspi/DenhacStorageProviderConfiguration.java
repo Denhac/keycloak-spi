@@ -4,34 +4,42 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 public class DenhacStorageProviderConfiguration {
-    public static final String DEFAULT_API_BASE_URL = "https://denhac.org/wp-json/denhac/v1";
-    public final String accessKey;
-    public final String accessSecret;
-    private final String basePath;
 
-    public DenhacStorageProviderConfiguration(String basePath, String accessKey, String accessSecret) {
-        this.basePath = basePath;
+    public static final String DENHAC_BASE_URL = "denhac base url";
+    public static final String DENHAC_ACCESS_KEY = "denhac access key";
+    public static final String DENHAC_ACCESS_KEY_SECRET = "denhac access key secret";
+
+    public String accessKey;
+    public String accessSecret;
+    public URL baseURL;
+
+    public DenhacStorageProviderConfiguration(URL baseURL, String accessKey, String accessSecret) {
+        this.baseURL = baseURL;
         this.accessKey = accessKey;
         this.accessSecret = accessSecret;
     }
 
-    public static DenhacStorageProviderConfiguration createFromEnv() {
-        String baseUrlFromEnv = System.getenv("DENHAC_BASE_URL");
-
-        return new DenhacStorageProviderConfiguration(
-                System.getenv("DENHAC_ACCESS_KEY"),
-                System.getenv("DENHAC_ACCESS_KEY_SECRET"),
-                baseUrlFromEnv.isBlank()
-                        ? DEFAULT_API_BASE_URL
-                        : baseUrlFromEnv
-        );
+    public URL validateEndpoint() {
+        try {
+            return new URL(this.baseURL, "/validate-user");
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException("Unable to construct url", e);
+        }
     }
 
-    public URL validateEndpoint() throws MalformedURLException {
-        return new URL(this.basePath + "/validate");
+    public URL getUserEndpoint() {
+        try {
+            return new URL(this.baseURL, "/get-member");
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException("Unable to construct url", e);
+        }
     }
 
-    public URL listUsersEndpoint() throws MalformedURLException {
-        return new URL(this.basePath + "/list-users");
+    public URL listUsersEndpoint() {
+        try {
+            return new URL(this.baseURL, "/list-members");
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException("Unable to construct url", e);
+        }
     }
 }
