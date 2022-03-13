@@ -1,6 +1,7 @@
 package org.denhac.keycloakspi;
 
 import org.jboss.logging.Logger;
+import org.keycloak.common.util.MultivaluedHashMap;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -15,6 +16,16 @@ public class DenhacStorageProviderConfiguration {
     public String accessKey;
     public String accessSecret;
     public URL baseURL;
+
+    public DenhacStorageProviderConfiguration(MultivaluedHashMap<String, String> config) {
+        try {
+            this.baseURL = new URL(config.getFirst(DENHAC_BASE_URL));
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException("unable to parse url", e);
+        }
+        this.accessKey = config.getFirst(DENHAC_ACCESS_KEY);
+        this.accessSecret = config.getFirst(DENHAC_ACCESS_KEY_SECRET);
+    }
 
     public DenhacStorageProviderConfiguration(URL baseURL, String accessKey, String accessSecret) {
         this.baseURL = baseURL;

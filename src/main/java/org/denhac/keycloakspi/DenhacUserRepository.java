@@ -115,6 +115,7 @@ public class DenhacUserRepository {
         }
     }
 
+    // TODO this needs to return a null user if not found for provider validate
     public UserModel getUserByID(String userID, RealmModel realmModel) {
         logger.info("getUserByID called");
 

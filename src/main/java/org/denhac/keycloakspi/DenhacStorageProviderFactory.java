@@ -5,16 +5,26 @@ import org.jboss.logging.Logger;
 import org.keycloak.component.ComponentModel;
 import org.keycloak.component.ComponentValidationException;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
+import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.provider.ProviderConfigurationBuilder;
 import org.keycloak.storage.UserStorageProviderFactory;
+import org.keycloak.storage.UserStorageProviderModel;
+import org.keycloak.storage.user.ImportSynchronization;
+import org.keycloak.storage.user.SynchronizationResult;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Date;
 import java.util.List;
 
-public class DenhacStorageProviderFactory implements UserStorageProviderFactory<DenhacStorageProvider> {
+public class DenhacStorageProviderFactory implements
+        UserStorageProviderFactory<DenhacStorageProvider>,
+        ImportSynchronization {
+
     private static final Logger logger = Logger.getLogger(DenhacStorageProviderFactory.class);
 
     @Override
@@ -93,5 +103,45 @@ public class DenhacStorageProviderFactory implements UserStorageProviderFactory<
         if (accessSecret == null || accessSecret.isEmpty()) {
             throw new ComponentValidationException("denhac access key secret required");
         }
+    }
+
+    @Override
+    public SynchronizationResult sync(KeycloakSessionFactory sessionFactory, String realmId, UserStorageProviderModel model) {
+        logger.info("sync called");
+
+        logger.infof("realmId: %s, model: %s", realmId, model.toString());
+
+        var syncResult = new SynchronizationResult();
+
+        KeycloakModelUtils.runJobInTransaction(sessionFactory, session -> {
+            logger.info("sync tx started");
+            RealmModel realm = session.realms().getRealm(realmId);
+            logger.infof("realm id %s", realm.getId());
+            logger.infof("realm string %s", realm.toString());
+            session.getContext().setRealm(realm);
+
+            var config = new DenhacStorageProviderConfiguration(model.getConfig());
+            var denhacUserRep = new DenhacUserRepository(config, session, model);
+
+            List<UserModel> users = denhacUserRep.getUsers(realm);
+            logger.infof("user count: %d", users.size());
+
+            for (UserModel user : users) {
+                logger.infof("syncing user: %s", user.getUsername());
+                // TODO: StorageID is too long. f:uuid-of-provider:denhacID. We need to figure out where to override this to make it fit in a varchar 36
+                var u = session.userLocalStorage().addUser(realm, user.getId(), user.getUsername(), true, true);
+                syncResult.increaseAdded();
+            }
+
+        });
+
+        logger.infof("added %d users", syncResult.getAdded());
+
+        return syncResult;
+    }
+
+    @Override
+    public SynchronizationResult syncSince(Date lastSync, KeycloakSessionFactory sessionFactory, String realmId, UserStorageProviderModel model) {
+        return null;
     }
 }
