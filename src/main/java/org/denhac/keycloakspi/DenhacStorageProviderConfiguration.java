@@ -1,9 +1,12 @@
 package org.denhac.keycloakspi;
 
+import org.jboss.logging.Logger;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 
 public class DenhacStorageProviderConfiguration {
+    private static final Logger logger = Logger.getLogger(DenhacStorageProviderConfiguration.class);
 
     public static final String DENHAC_BASE_URL = "denhac base url";
     public static final String DENHAC_ACCESS_KEY = "denhac access key";
@@ -17,19 +20,24 @@ public class DenhacStorageProviderConfiguration {
         this.baseURL = baseURL;
         this.accessKey = accessKey;
         this.accessSecret = accessSecret;
+
+        logger.infof("baseURL: %s, accessKey: %s, accessSecret: %s", baseURL, accessKey, accessSecret);
     }
 
     public URL validateEndpoint() {
         try {
-            return new URL(this.baseURL, "/validate-user");
+            return new URL(this.baseURL, "validate-user");
         } catch (MalformedURLException e) {
             throw new IllegalArgumentException("Unable to construct url", e);
         }
     }
 
-    public URL getUserEndpoint() {
+    public URL getUserEndpoint(String userID) {
+        logger.info("getUserEndpoint: " + userID);
         try {
-            return new URL(this.baseURL, "/get-member");
+            var u = new URL(this.baseURL, "get-member/" + userID);
+            logger.infof("URL is: %s", u.toString());
+            return u;
         } catch (MalformedURLException e) {
             throw new IllegalArgumentException("Unable to construct url", e);
         }
@@ -37,7 +45,14 @@ public class DenhacStorageProviderConfiguration {
 
     public URL listUsersEndpoint() {
         try {
-            return new URL(this.baseURL, "/list-members");
+            logger.info("listUsersEndpoint");
+            logger.info(this.baseURL);
+
+            var u =  new URL(this.baseURL, "list-members");
+
+            logger.info(u);
+
+            return u;
         } catch (MalformedURLException e) {
             throw new IllegalArgumentException("Unable to construct url", e);
         }

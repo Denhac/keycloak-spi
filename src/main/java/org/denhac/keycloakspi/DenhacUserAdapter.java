@@ -11,13 +11,14 @@ public class DenhacUserAdapter extends AbstractUserAdapterFederatedStorage {
     private final DenhacUser user;
 
     public DenhacUserAdapter(KeycloakSession session, RealmModel realm, ComponentModel storageProviderModel, DenhacUser user) {
+
         super(session, realm, storageProviderModel);
         this.storageId = new StorageId(storageProviderModel.getId(), user.getId());
         this.user = user;
-        setFirstName(user.getFirstName());
-        setLastName(user.getLastName());
-        setEmail(user.getEmail());
-        setEnabled(user.getMembershipStatus() == DenhacUser.MembershipStatus.ACTIVE);
+        this.setFirstName(user.getFirstName());
+        this.setLastName(user.getLastName());
+        this.setEmail(user.getEmail());
+        this.setEnabled(user.getMembershipStatus() == DenhacUser.MembershipStatus.ACTIVE);
         // TODO: timestamp?
         // TODO: roles
     }
