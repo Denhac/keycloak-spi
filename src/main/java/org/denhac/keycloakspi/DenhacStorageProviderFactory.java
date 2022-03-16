@@ -128,11 +128,24 @@ public class DenhacStorageProviderFactory implements
 
             for (UserModel user : users) {
                 logger.infof("syncing user: %s", user.getUsername());
-                // TODO: StorageID is too long. f:uuid-of-provider:denhacID. We need to figure out where to override this to make it fit in a varchar 36
-                var u = session.userLocalStorage().addUser(realm, user.getId(), user.getUsername(), true, true);
-                syncResult.increaseAdded();
-            }
 
+                // TODO pull this split out
+                var u = session.userLocalStorage().getUserById(realm, user.getId().split(":")[2]);
+                if (u == null) {
+                    logger.infof("user %s not found. creating", user.getUsername());
+                    // TODO pull this split out
+                    u = session.userLocalStorage().addUser(realm, user.getId().split(":")[2], user.getUsername(), true, true);
+                    syncResult.increaseAdded();
+                } else {
+                    logger.infof("user %s found. updating", user.getUsername());
+                    syncResult.increaseUpdated();
+                }
+                u.setEmail(user.getEmail());
+                u.setFirstName(user.getFirstName());
+                u.setLastName(user.getLastName());
+                u.setEnabled(user.isEnabled());
+                u.setEmailVerified(true);
+            }
         });
 
         logger.infof("added %d users", syncResult.getAdded());
