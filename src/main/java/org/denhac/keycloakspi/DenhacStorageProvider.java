@@ -13,9 +13,11 @@ import org.keycloak.storage.user.UserQueryProvider;
 
 import org.jboss.logging.Logger;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class DenhacStorageProvider implements
         UserStorageProvider,
@@ -83,8 +85,21 @@ public class DenhacStorageProvider implements
     @Override
     public UserModel getUserByUsername(String username, RealmModel realmModel) {
         logger.infof("getUserByUsername called %s", username);
-        // TODO don't query all for this
-        return (UserModel) this.denhacUserRepo.getUsers(realmModel).stream().filter(userModel -> userModel.getUsername().equals(username)).toArray()[0];
+        var user = this.keycloakSession.userLocalStorage().getUserByUsername(realmModel, username);
+        if (user == null) {
+            logger.infof("user %s not found trying remote lookup", username);
+            // TODO don't query all for this
+            List<UserModel> users = this.denhacUserRepo.getUsers(realmModel).stream().filter(userModel -> userModel.getUsername().equals(username)).collect(Collectors.toList());
+            if (users.size() == 0) {
+                logger.infof("user %s not found in remote", username);
+                return null;
+            } else if (users.size() > 1) {
+                logger.infof("multiple users found: %s", users.stream().map(UserModel::getUsername).collect(Collectors.joining(" ")));
+                return null;
+            }
+            user = users.get(0);
+        }
+        return user;
     }
 
     @Override

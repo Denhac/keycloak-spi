@@ -11,7 +11,6 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.provider.ProviderConfigurationBuilder;
-import org.keycloak.storage.StorageId;
 import org.keycloak.storage.UserStorageProvider;
 import org.keycloak.storage.UserStorageProviderFactory;
 import org.keycloak.storage.UserStorageProviderModel;
@@ -133,8 +132,6 @@ public class DenhacStorageProviderFactory implements
             for (UserModel user : users) {
                 logger.infof("syncing user: %s", user.getUsername());
 
-                StorageId userId = new StorageId(user.getId());
-//                var u = session.userLocalStorage().getUserById(realm, userId.getId());
                 var u = session.userLocalStorage().getUserByUsername(realm, user.getUsername());
                 if (u == null) {
                     logger.infof("user %s not found. creating", user.getUsername());
