@@ -5,6 +5,7 @@ import org.keycloak.credential.CredentialInput;
 import org.keycloak.credential.CredentialInputValidator;
 import org.keycloak.models.*;
 import org.keycloak.models.credential.PasswordCredentialModel;
+import org.keycloak.storage.StorageId;
 import org.keycloak.storage.UserStorageProvider;
 import org.keycloak.storage.user.ImportedUserValidation;
 import org.keycloak.storage.user.UserLookupProvider;
@@ -25,10 +26,10 @@ public class DenhacStorageProvider implements
 
     static final Logger logger = Logger.getLogger(DenhacStorageProvider.class);
 
-    private final KeycloakSession keycloakSession;
-    private final ComponentModel componentModel;
-    private final DenhacStorageProviderConfiguration config;
-    private final DenhacUserRepository denhacUserRepo;
+    protected final KeycloakSession keycloakSession;
+    protected final ComponentModel componentModel;
+    protected final DenhacStorageProviderConfiguration config;
+    protected final DenhacUserRepository denhacUserRepo;
 
     public DenhacStorageProvider(KeycloakSession keycloakSession, ComponentModel componentModel, DenhacStorageProviderConfiguration config) {
         logger.info("DenhacStorageProvider constructor called");
@@ -53,7 +54,7 @@ public class DenhacStorageProvider implements
 
     @Override
     public boolean isValid(RealmModel realmModel, UserModel userModel, CredentialInput credentialInput) {
-        logger.info("isValid called");
+        logger.infof("isValid called %s", userModel.getId());
 
         if (!this.isConfiguredFor(realmModel, userModel, credentialInput.getType())) {
             return false;
@@ -73,21 +74,24 @@ public class DenhacStorageProvider implements
     }
 
     @Override
-    public UserModel getUserById(String userId, RealmModel realmModel) {
-        logger.info("getUserById called");
-        return this.denhacUserRepo.getUserByID(userId, realmModel);
+    public UserModel getUserById(String id, RealmModel realmModel) {
+        logger.infof("getUserById called %s", id);
+        StorageId userId = new StorageId(id);
+        return this.denhacUserRepo.getUserById(userId.getExternalId(), realmModel);
     }
 
     @Override
     public UserModel getUserByUsername(String username, RealmModel realmModel) {
-        logger.info("getUserByUsername called");
-        return null;
+        logger.infof("getUserByUsername called %s", username);
+        // TODO don't query all for this
+        return (UserModel) this.denhacUserRepo.getUsers(realmModel).stream().filter(userModel -> userModel.getUsername().equals(username)).toArray()[0];
     }
 
     @Override
     public UserModel getUserByEmail(String email, RealmModel realmModel) {
-        logger.info("getUserByEmail called");
-        return null;
+        logger.infof("getUserByEmail called %s", email);
+        // TODO don't query all for this
+        return (UserModel) this.denhacUserRepo.getUsers(realmModel).stream().filter(userModel -> userModel.getEmail().equals(email)).toArray()[0];
     }
 
     @Override
@@ -98,31 +102,43 @@ public class DenhacStorageProvider implements
 
     @Override
     public List<UserModel> getUsers(RealmModel realmModel, int firstResult, int maxResults) {
-        logger.info("getUsers offset called");
+        logger.infof("getUsers called with %d %d", firstResult, maxResults);
+        // TODO better performance with offset
         return this.getUsers(realmModel);
     }
 
     @Override
     public List<UserModel> searchForUser(String s, RealmModel realmModel) {
-        logger.info("Search for user string: " + s);
+        logger.infof("searchForUser called with string: %s", s);
+        // TODO I think returning empty list here makes keycloak look up in local storage
         return Collections.emptyList();
     }
 
     @Override
     public List<UserModel> searchForUser(String s, RealmModel realmModel, int i, int i1) {
-        logger.info("Search for user with i, i1: " + s + "[i=" + i + "] [i1=" + i1 + "]");
+        logger.infof("searchForUser called with string: %s %d %d", s, i, i1);
+        // TODO I think returning empty list here makes keycloak look up in local storage
         return Collections.emptyList();
     }
 
     @Override
     public List<UserModel> searchForUser(Map<String, String> map, RealmModel realmModel) {
-        logger.info("Search for user<string, string>: " + map.toString());
+        logger.infof("searchForUser called with map: %s", map.toString());
+        // TODO I think returning empty list here makes keycloak look up in local storage
         return Collections.emptyList();
     }
 
     @Override
     public List<UserModel> searchForUser(Map<String, String> map, RealmModel realmModel, int i, int i1) {
-        logger.info("Search for user<string, string, i, i1: " + map.toString() + " [i=" + i + "] [i1=" + i1 + "]");
+        logger.infof("searchForUser called with map: %s, %d %d", map.toString(), i, i1);
+        // TODO I think returning empty list here makes keycloak look up in local storage
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<UserModel> searchForUserByUserAttribute(String s, String s1, RealmModel realmModel) {
+        logger.infof("searchForUserByUserAttribute called with %s %s", s, s1);
+        // TODO I think returning empty list here makes keycloak look up in local storage
         return Collections.emptyList();
     }
 
@@ -134,19 +150,14 @@ public class DenhacStorageProvider implements
 
     @Override
     public List<UserModel> getGroupMembers(RealmModel realmModel, GroupModel groupModel, int i, int i1) {
-        logger.info("getGroupMembers with i/i1 called");
-        return Collections.emptyList();
-    }
-
-    @Override
-    public List<UserModel> searchForUserByUserAttribute(String s, String s1, RealmModel realmModel) {
-        logger.info("Search for user by user attribute: " + s + " " + s1);
+        logger.infof("getGroupMembers called with %d %d", i, i1);
         return Collections.emptyList();
     }
 
     @Override
     public UserModel validate(RealmModel realm, UserModel user) {
-        logger.info("validate called");
-        return this.getUserById(user.getId(), realm);
+        logger.infof("validate called with %s %s", user.getId(), user.getUsername());
+        // Return null here to have keycloak remove user from local storage and query our provider
+        return user;
     }
 }

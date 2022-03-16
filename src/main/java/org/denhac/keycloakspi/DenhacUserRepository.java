@@ -10,10 +10,10 @@ import org.keycloak.component.ComponentModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.storage.StorageId;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -117,14 +117,13 @@ public class DenhacUserRepository {
     }
 
     // TODO this needs to return a null user if not found for provider validate
-    public UserModel getUserByID(String userID, RealmModel realmModel) {
-        logger.info("getUserByID called");
+    public UserModel getUserById(String id, RealmModel realmModel) {
+        logger.info("getUserById called");
 
         DenhacUser user;
 
         Request request = newRequest()
-                // TODO array out of bounds?
-                .url(this.conifg.getUserEndpoint(userID.split(":")[2]))
+                .url(this.conifg.getUserEndpoint(id))
                 .get()
                 .build();
 
@@ -156,7 +155,7 @@ public class DenhacUserRepository {
                 throw new RuntimeException(String.format("unexpected status: %d", response.code()));
             }
         } catch (IOException | JsonDataException e) {
-            throw new RuntimeException("unable to fetch user: " + userID, e);
+            throw new RuntimeException("unable to fetch user: " + id, e);
         }
     }
 

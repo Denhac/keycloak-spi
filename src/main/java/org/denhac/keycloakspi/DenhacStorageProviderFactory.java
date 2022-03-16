@@ -11,6 +11,8 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.provider.ProviderConfigurationBuilder;
+import org.keycloak.storage.StorageId;
+import org.keycloak.storage.UserStorageProvider;
 import org.keycloak.storage.UserStorageProviderFactory;
 import org.keycloak.storage.UserStorageProviderModel;
 import org.keycloak.storage.user.ImportSynchronization;
@@ -123,21 +125,20 @@ public class DenhacStorageProviderFactory implements
             logger.infof("realm string %s", realm.toString());
             session.getContext().setRealm(realm);
 
-            var config = new DenhacStorageProviderConfiguration(model.getConfig());
-            var denhacUserRep = new DenhacUserRepository(config, session, model);
+            DenhacStorageProvider dsp = (DenhacStorageProvider) session.getProvider(UserStorageProvider.class, model);
 
-            List<UserModel> users = denhacUserRep.getUsers(realm);
+            List<UserModel> users = dsp.denhacUserRepo.getUsers(realm);
             logger.infof("user count: %d", users.size());
 
             for (UserModel user : users) {
                 logger.infof("syncing user: %s", user.getUsername());
 
-                // TODO pull this split out
-                var u = session.userLocalStorage().getUserById(realm, user.getId().split(":")[2]);
+                StorageId userId = new StorageId(user.getId());
+//                var u = session.userLocalStorage().getUserById(realm, userId.getId());
+                var u = session.userLocalStorage().getUserByUsername(realm, user.getUsername());
                 if (u == null) {
                     logger.infof("user %s not found. creating", user.getUsername());
-                    // TODO pull this split out
-                    u = session.userLocalStorage().addUser(realm, user.getId().split(":")[2], user.getUsername(), true, true);
+                    u = session.userLocalStorage().addUser(realm, user.getUsername());
                     syncResult.increaseAdded();
                 } else {
                     logger.infof("user %s found. updating", user.getUsername());
@@ -148,16 +149,19 @@ public class DenhacStorageProviderFactory implements
                 u.setLastName(user.getLastName());
                 u.setEnabled(user.isEnabled());
                 u.setEmailVerified(true);
+                // This is what maps user login to our provider
+                u.setFederationLink(model.getId());
             }
         });
 
-        logger.infof("added %d users", syncResult.getAdded());
+        logger.infof("added %d updated %d", syncResult.getAdded(), syncResult.getUpdated());
 
         return syncResult;
     }
 
     @Override
     public SynchronizationResult syncSince(Date lastSync, KeycloakSessionFactory sessionFactory, String realmId, UserStorageProviderModel model) {
-        return null;
+        logger.infof("syncSince %s", lastSync.toString());
+        return sync(sessionFactory, realmId, model);
     }
 }
