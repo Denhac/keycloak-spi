@@ -37,6 +37,7 @@ public class DenhacUserRepository {
     }
 
     public boolean validateUser(String username, String password) {
+        logger.infof("validateUser: %s", username);
         RequestBody formBody = new FormBody.Builder()
                 .add("username", username)
                 .add("password", password)

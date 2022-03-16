@@ -29,6 +29,7 @@ public class DenhacStorageProviderFactory implements
 
     @Override
     public DenhacStorageProvider create(KeycloakSession keycloakSession, ComponentModel componentModel) {
+        logger.info("create called");
         try {
             var config = componentModel.getConfig();
             return new DenhacStorageProvider(
@@ -78,11 +79,13 @@ public class DenhacStorageProviderFactory implements
 
     @Override
     public List<ProviderConfigProperty> getConfigProperties() {
+        logger.info("getConfigProperties called");
         return configProperties;
     }
 
     @Override
     public void validateConfiguration(KeycloakSession session, RealmModel realm, ComponentModel config) throws ComponentValidationException {
+        logger.info("validateConfiguration called");
         var baseURL = config.getConfig().getFirst(DenhacStorageProviderConfiguration.DENHAC_BASE_URL);
         var accessKey = config.getConfig().getFirst(DenhacStorageProviderConfiguration.DENHAC_ACCESS_KEY);
         var accessSecret = config.getConfig().getFirst(DenhacStorageProviderConfiguration.DENHAC_ACCESS_KEY_SECRET);

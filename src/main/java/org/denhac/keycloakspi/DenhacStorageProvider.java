@@ -47,6 +47,7 @@ public class DenhacStorageProvider implements
 
     @Override
     public boolean isConfiguredFor(RealmModel realmModel, UserModel userModel, String credentialType) {
+        logger.info("isConfiguredFor called");
         return this.supportsCredentialType(credentialType);
     }
 
@@ -145,6 +146,7 @@ public class DenhacStorageProvider implements
 
     @Override
     public UserModel validate(RealmModel realm, UserModel user) {
+        logger.info("validate called");
         return this.getUserById(user.getId(), realm);
     }
 }
